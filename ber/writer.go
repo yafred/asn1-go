@@ -1,5 +1,9 @@
 package ber
 
+import (
+	"github.com/yafred/asn1-go/asn1"
+)
+
 // Writer helps encode ASN.1 values
 type writer struct {
 	// size of the encoded data sitting (at the end) in the dataBuffer
@@ -27,7 +31,7 @@ func (w *writer) GetDataBuffer() []byte {
 	return w.dataBuffer[bufferPosition:]
 }
 
-// WriteOctetString writes a []byte to the buffer and return length of encoded data
+// WriteOctetString encodes a []byte to the buffer and return length of encoded data
 func (w *writer) WriteOctetString(value []byte) int {
 	w.increaseDataSize(len(value))
 	var bufferPosition = len(w.dataBuffer) - w.dataSize
@@ -35,10 +39,10 @@ func (w *writer) WriteOctetString(value []byte) int {
 	return len(value)
 }
 
-// WriteBoolean writes a boolean to the buffer and return length of encoded data (always 1 in this case)
+// WriteBoolean encodes a boolean to the buffer and return length of encoded data (always 1 in this case)
 func (w *writer) WriteBoolean(value bool) int {
 	w.increaseDataSize(1)
-	if value == true {
+	if value {
 		w.dataBuffer[len(w.dataBuffer)-w.dataSize] = 0xFF
 	} else {
 		w.dataBuffer[len(w.dataBuffer)-w.dataSize] = 0
@@ -46,13 +50,202 @@ func (w *writer) WriteBoolean(value bool) int {
 	return 1
 }
 
-// WriteRestrictedCharacterString writes a string as []byte to the buffer and return length of encoded data
+// WriteRestrictedCharacterString encodes a string as []byte to the buffer and return length of encoded data
 func (w *writer) WriteRestrictedCharacterString(value string) int {
 	valueAsBytes := []byte(value)
 	w.increaseDataSize(len(valueAsBytes))
 	var bufferPosition = len(w.dataBuffer) - w.dataSize
 	copy(w.dataBuffer[bufferPosition:], valueAsBytes)
 	return len(valueAsBytes)
+}
+
+// WriteInteger encodes an integer to the buffer and return length of encoded data
+func (w *writer) WriteInteger(value int) int {
+	var nBytes int // bytes needed to write integer
+
+	if value >= 0 {
+		switch {
+		case value < 0x80:
+			nBytes = 1
+		case value < 0x8000:
+			nBytes = 2
+		case value < 0x800000:
+			nBytes = 3
+		default:
+			nBytes = 4
+		}
+	} else {
+		switch {
+		case value > 0xffffff80:
+			nBytes = 1
+		case value > 0xffff8000:
+			nBytes = 2
+		case value > 0xff800000:
+			nBytes = 3
+		default:
+			nBytes = 4
+		}
+	}
+
+	w.increaseDataSize(nBytes)
+
+	beginPos := len(w.dataBuffer) - w.dataSize
+	endPos := (beginPos + nBytes) - 1
+
+	for i := endPos; i >= beginPos; i-- {
+		w.dataBuffer[i] = byte(value)
+		value = value >> 8
+	}
+
+	return nBytes
+}
+
+// WriteBitString encodes a BitString struct to the buffer and return length of encoded data
+func (w *writer) WriteBitString(value asn1.BitString) int {
+	var nBytes int
+
+	if value.Length > 0 && value.Bytes != nil && len(value.Bytes) != 0 {
+		length := value.Length
+		bytes := value.Bytes
+		if length > 8*len(bytes) {
+			length = 8 * len(bytes)
+		}
+
+		padding := length % 8
+		if padding != 0 {
+			padding = 8 - padding
+		}
+
+		nBytes += w.WriteOctetString(bytes)
+		nBytes += w.writeByte(byte(padding))
+	}
+	return nBytes
+}
+
+// WriteRelativeOID encodes a RelativeOID struct to the buffer and return length of encoded data
+func (w *writer) WriteRelativeOID(value asn1.RelativeOID) int {
+	if len(value) == 0 {
+		return 0
+	}
+
+	var nBytes int
+
+	for i := len(value) - 1; i >= 0; i-- {
+		arc := value[i]
+		isLast := true
+		for ok := true; ok; {
+			aByte := arc % 128
+			arc = arc / 128
+			if isLast {
+				isLast = false
+			} else {
+				aByte |= 0x80
+			}
+			w.writeByte(byte(aByte))
+			nBytes++
+			if arc <= 0 {
+				ok = false
+			}
+		}
+	}
+
+	return nBytes
+}
+
+// WriteObjectIdentifier encodes a ObjectIdentifier struct to the buffer and return length of encoded data
+func (w *writer) WriteObjectIdentifier(value asn1.ObjectIdentifier) int {
+
+	// Error cases: just do nothing for now
+	if len(value) < 2 {
+		// Object Identifier must have at least 2 arcs
+		return 0
+	}
+	if value[0] > 2 {
+		// Object Identifier first arc must be 0, 1 or 2
+		return 0
+	}
+	if value[0] == 0 && value[1] > 39 {
+		// Object Identifier second arc must be < 40 when first arc is 0
+		return 0
+	}
+	if value[0] == 1 && (value[1] == 0 || value[1] > 39) {
+		// Object Identifier second arc must be > 0 and < 40 when first arc is 1
+		return 0
+	}
+
+	var nBytes int
+
+	for i := len(value) - 1; i > 1; i-- {
+		arc := value[i]
+		isLast := true
+		for ok := true; ok; {
+			aByte := arc % 128
+			arc = arc / 128
+			if isLast {
+				isLast = false
+			} else {
+				aByte |= 0x80
+			}
+			w.writeByte(byte(aByte))
+			nBytes++
+			if arc <= 0 {
+				ok = false
+			}
+		}
+	}
+
+	// then the 2 first arcs
+	arc := 40*value[0] + value[1]
+	isLast := true
+	for ok := true; ok; {
+		aByte := arc % 128
+		arc = arc / 128
+		if isLast {
+			isLast = false
+		} else {
+			aByte |= 0x80
+		}
+		w.writeByte(byte(aByte))
+		nBytes++
+		if arc <= 0 {
+			ok = false
+		}
+	}
+
+	return nBytes
+}
+
+// WriteLength encodes a length in definite form  and return length of encoded data
+func (w *writer) WriteLength(value uint32) uint32 {
+	var nBytes uint32 = 1
+
+	switch {
+	case value > 0xFFFFFF:
+		nBytes = 5
+	case value > 0xFFFF:
+		nBytes = 4
+	case value > 0xFF:
+		nBytes = 3
+	case value > 0x7F:
+		nBytes = 2
+	}
+
+	var nShift uint
+	for i := nBytes; i > 1; {
+		aByte := byte(value >> nShift)
+		w.writeByte(aByte)
+		i = i - 1
+		nShift = nShift + 8
+	}
+
+	// first byte is either number of subsequent bytes or the length itself
+	firstByte := byte(value)
+	if nBytes > 1 {
+		firstByte = byte(nBytes-1) | 0x80
+	}
+	w.writeByte(firstByte)
+
+	return nBytes
 }
 
 // WriteByte writes a byte to the buffer and return length of encoded data (always 1 in this case)
