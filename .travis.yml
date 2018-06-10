@@ -11,6 +11,5 @@ install:
   - go get github.com/modocache/gover
 
 script:
-  - go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' ./... | xargs sh -c
   - $GOPATH/bin/gover
   - $GOPATH/bin/goveralls -coverprofile=gover.coverprofile -service=travis-ci
