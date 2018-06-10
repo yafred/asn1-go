@@ -1,8 +1,13 @@
 language: go
   
+sudo: false
+
 go:
   - "1.10"
+  - tip
   
 install:
-  - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
+
+script:
+  - $GOPATH/bin/goveralls -service=travis-ci
