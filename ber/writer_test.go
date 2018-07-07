@@ -145,11 +145,24 @@ func TestWriteLength4b(t *testing.T) {
 func TestWriteInteger1b(t *testing.T) {
 	writer := ber.NewWriter(10)
 
-	var encoded = writer.WriteInteger(10)
+	var encoded = writer.WriteInteger(127)
 	if encoded != 1 {
 		t.Fatal("Should be 1")
 	}
-	expectedBuffer := [...]byte{0x0a}
+	expectedBuffer := [...]byte{0x7f}
+	if false == bytes.Equal(writer.GetDataBuffer(), expectedBuffer[0:]) {
+		t.Fatal("Wrong")
+	}
+}
+
+func TestWriteInteger1b2(t *testing.T) {
+	writer := ber.NewWriter(10)
+
+	var encoded = writer.WriteInteger(-128)
+	if encoded != 1 {
+		t.Fatal("Should be 1")
+	}
+	expectedBuffer := [...]byte{0x80}
 	if false == bytes.Equal(writer.GetDataBuffer(), expectedBuffer[0:]) {
 		t.Fatal("Wrong")
 	}
@@ -189,6 +202,19 @@ func TestWriteInteger4b(t *testing.T) {
 		t.Fatal("Should be 4")
 	}
 	expectedBuffer := [...]byte{0x04, 0xc4, 0xb4, 0x00}
+	if false == bytes.Equal(writer.GetDataBuffer(), expectedBuffer[0:]) {
+		t.Fatal("Wrong")
+	}
+}
+
+func TestWriteInteger4b2(t *testing.T) {
+	writer := ber.NewWriter(10)
+
+	var encoded = writer.WriteInteger(-25000000)
+	if encoded != 4 {
+		t.Fatal("Should be 4")
+	}
+	expectedBuffer := [...]byte{0xfe, 0x82, 0x87, 0xc0}
 	if false == bytes.Equal(writer.GetDataBuffer(), expectedBuffer[0:]) {
 		t.Fatal("Wrong")
 	}

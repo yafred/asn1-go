@@ -4,7 +4,7 @@ import (
 	"github.com/yafred/asn1-go/asn1"
 )
 
-// Writer helps encode ASN.1 values
+// writer helps encode ASN.1 values
 type writer struct {
 	// size of the encoded data sitting (at the end) in the dataBuffer
 	dataSize int
@@ -76,11 +76,11 @@ func (w *writer) WriteInteger(value int) int {
 		}
 	} else {
 		switch {
-		case value > 0xffffff80:
+		case value >= 0x80*-1:
 			nBytes = 1
-		case value > 0xffff8000:
+		case value >= 0x8000*-1:
 			nBytes = 2
-		case value > 0xff800000:
+		case value >= 0x800000*-1:
 			nBytes = 3
 		default:
 			nBytes = 4
