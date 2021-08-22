@@ -2,15 +2,15 @@ package ber
 
 import (
 	"errors"
+	"io"
+
 	"github.com/yafred/asn1-go/asn1"
 )
 
 // reader helps decode ASN.1 values
 type reader struct {
-	dataBuffer []byte
-
-	// current read offset in dataBuffer
-	offset int
+	// stream to read from
+	in io.Reader
 
 	// value of last read length
 	lengthLength int
@@ -23,32 +23,28 @@ type reader struct {
 }
 
 // NewReader creates a reader
-func NewReader(dataBuffer []byte) *reader {
+func NewReader(in io.Reader) *reader {
 	r := new(reader)
-	r.dataBuffer = dataBuffer
+	r.in = in
 	return r
 }
 
 // ReadOctetString decodes a []byte value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
 func (r *reader) ReadOctetString(nBytes int) ([]byte, error) {
-	if len(r.dataBuffer) < r.offset+nBytes {
-		err := errors.New("Premature end of buffer")
-		return nil, err
-	}
+	buffer := make([]byte, nBytes)
 
-	r.offset += nBytes
-	return r.dataBuffer[r.offset-nBytes : r.offset], nil
+	_, err := r.in.Read(buffer)
+
+	return buffer[0:], err
 }
 
 // ReadRestrictedCharacterString decodes a string value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
 func (r *reader) ReadRestrictedCharacterString(nBytes int) (string, error) {
-	if len(r.dataBuffer) < r.offset+nBytes {
-		err := errors.New("Premature end of buffer")
-		return "", err
-	}
+	buffer := make([]byte, nBytes)
 
-	r.offset += nBytes
-	return string(r.dataBuffer[r.offset-nBytes : r.offset]), nil
+	_, err := r.in.Read(buffer)
+
+	return string(buffer), err
 }
 
 // ReadBoolean decodes a boolean value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
@@ -66,14 +62,11 @@ func (r *reader) ReadBoolean() (bool, error) {
 
 // readByte reads a byte from the dataBuffer, raises an error if end of dataBuffer is reached
 func (r *reader) readByte() (byte, error) {
-	if r.offset < len(r.dataBuffer) {
-		aByte := r.dataBuffer[r.offset]
-		r.offset++
-		return aByte, nil
-	}
+	buffer := make([]byte, 1)
 
-	err := errors.New("Premature end of buffer")
-	return 0, err
+	_, err := r.in.Read(buffer)
+
+	return buffer[0], err
 }
 
 // ReadLength reads a length from the dataBuffer, raises an error if end of dataBuffer is reached
@@ -97,7 +90,7 @@ func (r *reader) ReadLength() error {
 			nBytes := aByte & 0x7f
 
 			if nBytes > 4 {
-				return errors.New("Length over 4 bytes not supported")
+				return errors.New("length value more than 4 bytes not supported")
 			}
 
 			r.lengthLength = int(nBytes) + 1
@@ -132,7 +125,7 @@ func (r *reader) GetLengthLength() int {
 // ReadInteger reads a maximum of 4 bytes from the dataBuffer to decode an int, raises an error if end of dataBuffer is reached
 func (r *reader) ReadInteger(nBytes int) (int, error) {
 	if nBytes > 4 {
-		return 0, errors.New("Integers over 4 bytes not supported")
+		return 0, errors.New("integers over 4 bytes not supported")
 	}
 
 	aByte, err := r.readByte()
@@ -169,19 +162,19 @@ func (r *reader) ReadInteger(nBytes int) (int, error) {
 
 // ReadRelativeOID reads a nBytes bytes from the dataBuffer to decode a RelativeOID, raises an error if end of dataBuffer is reached
 func (r *reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
-	if len(r.dataBuffer) < r.offset+nBytes {
-		err := errors.New("Premature end of buffer")
-		return nil, err
-	}
 
 	if nBytes == 0 {
 		err := errors.New("ReadRelativeOID need at least one byte")
 		return nil, err
 	}
 
-	// Read nBytes bytes from reader
-	buffer := r.dataBuffer[r.offset : r.offset+nBytes]
-	r.offset += nBytes
+	buffer := make([]byte, nBytes)
+
+	_, err := r.in.Read(buffer)
+
+	if err != nil {
+		return nil, err
+	}
 
 	// The number of arcs in the RelativeOID will have the same number bytes to decode
 	ret := make([]int64, nBytes)
