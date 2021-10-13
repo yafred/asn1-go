@@ -5,7 +5,7 @@ import (
 )
 
 // writer helps encode ASN.1 values
-type writer struct {
+type Writer struct {
 	// size of the encoded data sitting (at the end) in the dataBuffer
 	dataSize int
 
@@ -16,8 +16,8 @@ type writer struct {
 }
 
 // NewWriter creates a writer
-func NewWriter(dataBufferIncrement int) *writer {
-	w := new(writer)
+func NewWriter(dataBufferIncrement int) *Writer {
+	w := new(Writer)
 	if dataBufferIncrement <= 0 {
 		dataBufferIncrement = 100
 	}
@@ -26,13 +26,13 @@ func NewWriter(dataBufferIncrement int) *writer {
 	return w
 }
 
-func (w *writer) GetDataBuffer() []byte {
+func (w *Writer) GetDataBuffer() []byte {
 	var bufferPosition = len(w.dataBuffer) - w.dataSize
 	return w.dataBuffer[bufferPosition:]
 }
 
 // WriteOctetString encodes a []byte to the buffer and return length of encoded data
-func (w *writer) WriteOctetString(value []byte) int {
+func (w *Writer) WriteOctetString(value []byte) int {
 	w.increaseDataSize(len(value))
 	var bufferPosition = len(w.dataBuffer) - w.dataSize
 	copy(w.dataBuffer[bufferPosition:], value)
@@ -40,7 +40,7 @@ func (w *writer) WriteOctetString(value []byte) int {
 }
 
 // WriteBoolean encodes a boolean to the buffer and return length of encoded data (always 1 in this case)
-func (w *writer) WriteBoolean(value bool) int {
+func (w *Writer) WriteBoolean(value bool) int {
 	w.increaseDataSize(1)
 	if value {
 		w.dataBuffer[len(w.dataBuffer)-w.dataSize] = 0xFF
@@ -51,7 +51,7 @@ func (w *writer) WriteBoolean(value bool) int {
 }
 
 // WriteRestrictedCharacterString encodes a string as []byte to the buffer and return length of encoded data
-func (w *writer) WriteRestrictedCharacterString(value string) int {
+func (w *Writer) WriteRestrictedCharacterString(value string) int {
 	valueAsBytes := []byte(value)
 	w.increaseDataSize(len(valueAsBytes))
 	var bufferPosition = len(w.dataBuffer) - w.dataSize
@@ -60,7 +60,7 @@ func (w *writer) WriteRestrictedCharacterString(value string) int {
 }
 
 // WriteInteger encodes an integer to the buffer and return length of encoded data
-func (w *writer) WriteInteger(value int) int {
+func (w *Writer) WriteInteger(value int) int {
 	var nBytes int // bytes needed to write integer
 
 	if value >= 0 {
@@ -101,7 +101,7 @@ func (w *writer) WriteInteger(value int) int {
 }
 
 // WriteBitString encodes a BitString struct to the buffer and return length of encoded data
-func (w *writer) WriteBitString(value asn1.BitString) int {
+func (w *Writer) WriteBitString(value asn1.BitString) int {
 	var nBytes int
 
 	if value.Length > 0 && value.Bytes != nil && len(value.Bytes) != 0 {
@@ -123,7 +123,7 @@ func (w *writer) WriteBitString(value asn1.BitString) int {
 }
 
 // WriteRelativeOID encodes a RelativeOID struct to the buffer and return length of encoded data
-func (w *writer) WriteRelativeOID(value asn1.RelativeOID) int {
+func (w *Writer) WriteRelativeOID(value asn1.RelativeOID) int {
 	if len(value) == 0 {
 		return 0
 	}
@@ -153,7 +153,7 @@ func (w *writer) WriteRelativeOID(value asn1.RelativeOID) int {
 }
 
 // WriteObjectIdentifier encodes a ObjectIdentifier struct to the buffer and return length of encoded data
-func (w *writer) WriteObjectIdentifier(value asn1.ObjectIdentifier) int {
+func (w *Writer) WriteObjectIdentifier(value asn1.ObjectIdentifier) int {
 
 	// Error cases: just do nothing for now
 	if len(value) < 2 {
@@ -216,7 +216,7 @@ func (w *writer) WriteObjectIdentifier(value asn1.ObjectIdentifier) int {
 }
 
 // WriteLength encodes a length in definite form  and return length of encoded data
-func (w *writer) WriteLength(value uint32) uint32 {
+func (w *Writer) WriteLength(value uint32) uint32 {
 	var nBytes uint32 = 1
 
 	switch {
@@ -249,14 +249,14 @@ func (w *writer) WriteLength(value uint32) uint32 {
 }
 
 // WriteByte writes a byte to the buffer and return length of encoded data (always 1 in this case)
-func (w *writer) writeByte(value byte) int {
+func (w *Writer) writeByte(value byte) int {
 	w.increaseDataSize(1)
 	w.dataBuffer[len(w.dataBuffer)-w.dataSize] = value
 	return 1
 }
 
 // increaseDataSize makes sure there is enough room in the buffer
-func (w *writer) increaseDataSize(nBytes int) {
+func (w *Writer) increaseDataSize(nBytes int) {
 	if (w.dataSize + nBytes) > len(w.dataBuffer) {
 		var increment = w.dataBufferIncrement
 		if nBytes > increment {

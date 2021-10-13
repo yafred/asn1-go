@@ -8,7 +8,7 @@ import (
 )
 
 // reader helps decode ASN.1 values
-type reader struct {
+type Reader struct {
 	// stream to read from
 	in io.Reader
 
@@ -23,14 +23,14 @@ type reader struct {
 }
 
 // NewReader creates a reader
-func NewReader(in io.Reader) *reader {
-	r := new(reader)
+func NewReader(in io.Reader) *Reader {
+	r := new(Reader)
 	r.in = in
 	return r
 }
 
 // ReadOctetString decodes a []byte value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
-func (r *reader) ReadOctetString(nBytes int) ([]byte, error) {
+func (r *Reader) ReadOctetString(nBytes int) ([]byte, error) {
 	buffer := make([]byte, nBytes)
 
 	_, err := r.in.Read(buffer)
@@ -39,7 +39,7 @@ func (r *reader) ReadOctetString(nBytes int) ([]byte, error) {
 }
 
 // ReadRestrictedCharacterString decodes a string value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
-func (r *reader) ReadRestrictedCharacterString(nBytes int) (string, error) {
+func (r *Reader) ReadRestrictedCharacterString(nBytes int) (string, error) {
 	buffer := make([]byte, nBytes)
 
 	_, err := r.in.Read(buffer)
@@ -48,7 +48,7 @@ func (r *reader) ReadRestrictedCharacterString(nBytes int) (string, error) {
 }
 
 // ReadBoolean decodes a boolean value from dataBuffer at current offset, raises an error if end of dataBuffer is reached
-func (r *reader) ReadBoolean() (bool, error) {
+func (r *Reader) ReadBoolean() (bool, error) {
 	aByte, err := r.readByte()
 	if err != nil {
 		return false, err
@@ -61,7 +61,7 @@ func (r *reader) ReadBoolean() (bool, error) {
 }
 
 // readByte reads a byte from the dataBuffer, raises an error if end of dataBuffer is reached
-func (r *reader) readByte() (byte, error) {
+func (r *Reader) readByte() (byte, error) {
 	buffer := make([]byte, 1)
 
 	_, err := r.in.Read(buffer)
@@ -71,7 +71,7 @@ func (r *reader) readByte() (byte, error) {
 
 // ReadLength reads a length from the dataBuffer, raises an error if end of dataBuffer is reached
 // raises an error if length has more than 4 bytes
-func (r *reader) ReadLength() error {
+func (r *Reader) ReadLength() error {
 	r.lengthLength = 0
 	r.lengthValue = 0
 
@@ -113,17 +113,17 @@ func (r *reader) ReadLength() error {
 }
 
 // GetLengthValue returns the last read length value (-1 if form is indefinite)
-func (r *reader) GetLengthValue() int {
+func (r *Reader) GetLengthValue() int {
 	return r.lengthValue
 }
 
 // GetLengthLength returns the number of bytes used to decode last read length value
-func (r *reader) GetLengthLength() int {
+func (r *Reader) GetLengthLength() int {
 	return r.lengthLength
 }
 
 // ReadInteger reads a maximum of 4 bytes from the dataBuffer to decode an int, raises an error if end of dataBuffer is reached
-func (r *reader) ReadInteger(nBytes int) (int, error) {
+func (r *Reader) ReadInteger(nBytes int) (int, error) {
 	if nBytes > 4 {
 		return 0, errors.New("integers over 4 bytes not supported")
 	}
@@ -161,7 +161,7 @@ func (r *reader) ReadInteger(nBytes int) (int, error) {
 }
 
 // ReadRelativeOID reads a nBytes bytes from the dataBuffer to decode a RelativeOID, raises an error if end of dataBuffer is reached
-func (r *reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
+func (r *Reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
 
 	if nBytes == 0 {
 		err := errors.New("ReadRelativeOID need at least one byte")
@@ -202,7 +202,7 @@ func (r *reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
 }
 
 // ReadObjectIdentifier reads a nBytes bytes from the dataBuffer to decode a ObjectIdentifier, raises an error if end of dataBuffer is reached
-func (r *reader) ReadObjectIdentifier(nBytes int) (asn1.ObjectIdentifier, error) {
+func (r *Reader) ReadObjectIdentifier(nBytes int) (asn1.ObjectIdentifier, error) {
 	value, err := r.ReadRelativeOID(nBytes)
 	if err != nil {
 		return nil, err
@@ -226,7 +226,7 @@ func (r *reader) ReadObjectIdentifier(nBytes int) (asn1.ObjectIdentifier, error)
 }
 
 // ReadTag reads a nBytes bytes from the dataBuffer to decode a tag, raises an error if end of dataBuffer is reached
-func (r *reader) ReadTag() error {
+func (r *Reader) ReadTag() error {
 	isLastByte := false
 	r.tagLength = 1
 	var err error
@@ -263,12 +263,12 @@ func (r *reader) ReadTag() error {
 }
 
 // GetTagLength returns the length of the last read tag
-func (r *reader) GetTagLength() int {
+func (r *Reader) GetTagLength() int {
 	return r.tagLength
 }
 
 // MatchTag return true if input matches last read tag
-func (r *reader) MatchTag(tag []byte) bool {
+func (r *Reader) MatchTag(tag []byte) bool {
 	r.tagMatched = false
 	if r.tagLength == len(tag) {
 		r.tagMatched = true
@@ -283,7 +283,7 @@ func (r *reader) MatchTag(tag []byte) bool {
 }
 
 // LookAheadTag return true if one item of the input matches last read tag
-func (r *reader) LookAheadTag(tags [][]byte) bool {
+func (r *Reader) LookAheadTag(tags [][]byte) bool {
 	foundMatch := false
 
 	for k := 0; k < len(tags) && !foundMatch; k++ {
