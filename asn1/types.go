@@ -12,7 +12,7 @@ type BitString struct {
 	Length int    // length of the BIT STRING in bits.
 }
 
-// Get retreives the bool value of a single bit
+// Get retrieves the bool value of a single bit
 func (b *BitString) Get(i int) bool {
 	if i < 0 || i >= b.Length {
 		return false
