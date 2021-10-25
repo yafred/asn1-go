@@ -1,4 +1,4 @@
-package asn1
+package types
 
 // ObjectIdentifier is the Go implementation of ASN.1 OBJECT IDENTIFIER.
 type ObjectIdentifier []int64
@@ -39,7 +39,7 @@ func (b *BitString) Set(i int, value bool) {
 	x := i / 8
 	y := uint(i % 8)
 	mask := 0x80 >> y
-	if value == true {
+	if value {
 		b.Bytes[x] = byte(int(b.Bytes[x]) | mask)
 	} else {
 		mask = mask ^ 0xff
