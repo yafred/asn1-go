@@ -4,7 +4,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/yafred/asn1-go/asn1"
+	"github.com/yafred/asn1-go/types"
 )
 
 // reader helps decode ASN.1 values
@@ -161,7 +161,7 @@ func (r *Reader) ReadInteger(nBytes int) (int, error) {
 }
 
 // ReadRelativeOID reads a nBytes bytes from the dataBuffer to decode a RelativeOID, raises an error if end of dataBuffer is reached
-func (r *Reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
+func (r *Reader) ReadRelativeOID(nBytes int) (types.RelativeOID, error) {
 
 	if nBytes == 0 {
 		err := errors.New("ReadRelativeOID need at least one byte")
@@ -202,7 +202,7 @@ func (r *Reader) ReadRelativeOID(nBytes int) (asn1.RelativeOID, error) {
 }
 
 // ReadObjectIdentifier reads a nBytes bytes from the dataBuffer to decode a ObjectIdentifier, raises an error if end of dataBuffer is reached
-func (r *Reader) ReadObjectIdentifier(nBytes int) (asn1.ObjectIdentifier, error) {
+func (r *Reader) ReadObjectIdentifier(nBytes int) (types.ObjectIdentifier, error) {
 	value, err := r.ReadRelativeOID(nBytes)
 	if err != nil {
 		return nil, err

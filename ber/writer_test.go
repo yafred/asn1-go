@@ -2,9 +2,10 @@ package ber_test
 
 import (
 	"bytes"
-	"github.com/yafred/asn1-go/asn1"
-	"github.com/yafred/asn1-go/ber"
 	"testing"
+
+	"github.com/yafred/asn1-go/ber"
+	"github.com/yafred/asn1-go/types"
 )
 
 func TestWriteBoolean(t *testing.T) {
@@ -224,7 +225,7 @@ func TestWriteBitString(t *testing.T) {
 	writer := ber.NewWriter(10)
 
 	bStringBytes := [...]byte{0x00, 0x20, 0x08}
-	bString := asn1.BitString{
+	bString := types.BitString{
 		Bytes: bStringBytes[0:], Length: 21,
 	}
 
@@ -241,7 +242,7 @@ func TestWriteBitString(t *testing.T) {
 func TestWriteBitString2(t *testing.T) {
 	writer := ber.NewWriter(10)
 
-	var bString asn1.BitString
+	var bString types.BitString
 	bString.Set(20, true)
 	bString.Set(10, true)
 
@@ -258,7 +259,7 @@ func TestWriteRelativeOID(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.RelativeOID([]int64{100, 2000, 12000})
+	value := types.RelativeOID([]int64{100, 2000, 12000})
 
 	var encoded = writer.WriteRelativeOID(value)
 
@@ -276,7 +277,7 @@ func TestWriteObjectIdentifier1(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{})
+	value := types.ObjectIdentifier([]int64{})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -294,7 +295,7 @@ func TestWriteObjectIdentifier2(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{1})
+	value := types.ObjectIdentifier([]int64{1})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -312,7 +313,7 @@ func TestWriteObjectIdentifier3(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{3, 40})
+	value := types.ObjectIdentifier([]int64{3, 40})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -330,7 +331,7 @@ func TestWriteObjectIdentifier4(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{1, 40})
+	value := types.ObjectIdentifier([]int64{1, 40})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -348,7 +349,7 @@ func TestWriteObjectIdentifier5(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{1, 1, 40})
+	value := types.ObjectIdentifier([]int64{1, 1, 40})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -366,7 +367,7 @@ func TestWriteObjectIdentifier6(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{1, 1, 200})
+	value := types.ObjectIdentifier([]int64{1, 1, 200})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 
@@ -384,7 +385,7 @@ func TestWriteObjectIdentifier7(t *testing.T) {
 
 	writer := ber.NewWriter(10)
 
-	value := asn1.ObjectIdentifier([]int64{2, 2000, 12000})
+	value := types.ObjectIdentifier([]int64{2, 2000, 12000})
 
 	var encoded = writer.WriteObjectIdentifier(value)
 

@@ -1,7 +1,7 @@
 package ber
 
 import (
-	"github.com/yafred/asn1-go/asn1"
+	"github.com/yafred/asn1-go/types"
 )
 
 // writer helps encode ASN.1 values
@@ -101,7 +101,7 @@ func (w *Writer) WriteInteger(value int) int {
 }
 
 // WriteBitString encodes a BitString struct to the buffer and return length of encoded data
-func (w *Writer) WriteBitString(value asn1.BitString) int {
+func (w *Writer) WriteBitString(value types.BitString) int {
 	var nBytes int
 
 	if value.Length > 0 && value.Bytes != nil && len(value.Bytes) != 0 {
@@ -123,7 +123,7 @@ func (w *Writer) WriteBitString(value asn1.BitString) int {
 }
 
 // WriteRelativeOID encodes a RelativeOID struct to the buffer and return length of encoded data
-func (w *Writer) WriteRelativeOID(value asn1.RelativeOID) int {
+func (w *Writer) WriteRelativeOID(value types.RelativeOID) int {
 	if len(value) == 0 {
 		return 0
 	}
@@ -153,7 +153,7 @@ func (w *Writer) WriteRelativeOID(value asn1.RelativeOID) int {
 }
 
 // WriteObjectIdentifier encodes a ObjectIdentifier struct to the buffer and return length of encoded data
-func (w *Writer) WriteObjectIdentifier(value asn1.ObjectIdentifier) int {
+func (w *Writer) WriteObjectIdentifier(value types.ObjectIdentifier) int {
 
 	// Error cases: just do nothing for now
 	if len(value) < 2 {
