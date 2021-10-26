@@ -341,6 +341,31 @@ func TestReadObjectIdentifier4(t *testing.T) {
 	}
 }
 
+func TestReadBitString(t *testing.T) {
+	in := bytes.NewReader([]byte{0x04, 0x50})
+
+	reader := NewReader(in)
+
+	value, err := reader.ReadBitString(2)
+
+	if err != nil {
+		t.Fatal("Wrong:", err)
+	}
+
+	if value.Get(0) {
+		t.Fatal("Wrong: bit 0 should be false")
+	}
+	if value.Get(1) == false {
+		t.Fatal("Wrong: bit 1 should be true")
+	}
+	if value.Get(2) {
+		t.Fatal("Wrong: bit 2 should be false")
+	}
+	if value.Get(3) == false {
+		t.Fatal("Wrong: bit 3 should be true")
+	}
+}
+
 func TestReadTag(t *testing.T) {
 	in := bytes.NewReader([]byte{0x1e})
 

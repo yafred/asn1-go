@@ -160,6 +160,32 @@ func (r *Reader) ReadInteger(nBytes int) (int, error) {
 	return result * mult, nil
 }
 
+// ReadBitString reads a nBytes bytes from the dataBuffer to decode a BitString, raises an error if end of dataBuffer is reached
+func (r *Reader) ReadBitString(nBytes int) (types.BitString, error) {
+	result := types.BitString{}
+
+	if nBytes == 0 {
+		return result, errors.New("zero length BIT STRING")
+	}
+
+	bytes := make([]byte, nBytes)
+	_, err := r.in.Read(bytes)
+	if err != nil {
+		return result, err
+	}
+
+	paddingBits := int(bytes[0])
+	if paddingBits > 7 ||
+		len(bytes) == 1 && paddingBits > 0 ||
+		bytes[len(bytes)-1]&((1<<bytes[0])-1) != 0 {
+		err = errors.New("invalid padding bits in BIT STRING")
+		return result, err
+	}
+	result.Length = (len(bytes)-1)*8 - paddingBits
+	result.Bytes = bytes[1:]
+	return result, nil
+}
+
 // ReadRelativeOID reads a nBytes bytes from the dataBuffer to decode a RelativeOID, raises an error if end of dataBuffer is reached
 func (r *Reader) ReadRelativeOID(nBytes int) (types.RelativeOID, error) {
 
