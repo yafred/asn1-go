@@ -1,14 +1,12 @@
-package types_test
+package types
 
 import (
 	"bytes"
 	"testing"
-
-	"github.com/yafred/asn1-go/types"
 )
 
 func TestBitString1(t *testing.T) {
-	var value types.BitString
+	var value BitString
 
 	value.Set(0, true)
 
@@ -29,7 +27,7 @@ func TestBitString1(t *testing.T) {
 
 func TestBitString2(t *testing.T) {
 	initialBytes := [1]byte{0xff}
-	value := types.BitString{Bytes: initialBytes[0:], Length: 8}
+	value := BitString{Bytes: initialBytes[0:], Length: 8}
 
 	value.Set(0, false)
 
@@ -45,7 +43,7 @@ func TestBitString2(t *testing.T) {
 }
 
 func TestBitString3(t *testing.T) {
-	var value types.BitString
+	var value BitString
 
 	value.Set(20, true)
 	value.Set(10, true)

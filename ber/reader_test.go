@@ -1,16 +1,14 @@
-package ber_test
+package ber
 
 import (
 	"bytes"
 	"testing"
-
-	"github.com/yafred/asn1-go/ber"
 )
 
 func TestReadBoolean(t *testing.T) {
 	in := bytes.NewReader([]byte{0xFF})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadBoolean()
 
@@ -32,7 +30,7 @@ func TestReadBoolean(t *testing.T) {
 func TestReadOctetString(t *testing.T) {
 	in := bytes.NewReader([]byte{0x01, 0x02})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadOctetString(2)
 
@@ -55,7 +53,7 @@ func TestReadOctetString(t *testing.T) {
 func TestReadRestrictedCharacterString(t *testing.T) {
 	in := bytes.NewReader([]byte{0x61, 0x62, 0x63, 0xc3, 0xa0})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadRestrictedCharacterString(5)
 
@@ -78,7 +76,7 @@ func TestReadRestrictedCharacterString(t *testing.T) {
 func TestReadLengthIndefinite(t *testing.T) {
 	in := bytes.NewReader([]byte{0x80})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadLength()
 
@@ -96,7 +94,7 @@ func TestReadLengthIndefinite(t *testing.T) {
 func TestReadLengthShortForm(t *testing.T) {
 	in := bytes.NewReader([]byte{0x0f})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadLength()
 
@@ -120,7 +118,7 @@ func TestReadLengthShortForm(t *testing.T) {
 func TestReadLengthLongForm1(t *testing.T) {
 	in := bytes.NewReader([]byte{0x81, 0x0a})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadLength()
 
@@ -144,7 +142,7 @@ func TestReadLengthLongForm1(t *testing.T) {
 func TestReadLengthLongForm2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x82, 0x01, 0xff})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadLength()
 
@@ -168,7 +166,7 @@ func TestReadLengthLongForm2(t *testing.T) {
 func TestReadInteger1b1(t *testing.T) {
 	in := bytes.NewReader([]byte{0x80})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadInteger(1)
 
@@ -184,7 +182,7 @@ func TestReadInteger1b1(t *testing.T) {
 func TestReadInteger1b2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x7f})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadInteger(1)
 
@@ -200,7 +198,7 @@ func TestReadInteger1b2(t *testing.T) {
 func TestReadInteger4b1(t *testing.T) {
 	in := bytes.NewReader([]byte{0x01, 0x7d, 0x78, 0x40})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadInteger(4)
 
@@ -216,7 +214,7 @@ func TestReadInteger4b1(t *testing.T) {
 func TestReadInteger4b2(t *testing.T) {
 	in := bytes.NewReader([]byte{0xfe, 0x82, 0x87, 0xc0})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadInteger(4)
 
@@ -232,7 +230,7 @@ func TestReadInteger4b2(t *testing.T) {
 func TestReadRelativeOID1(t *testing.T) {
 	in := bytes.NewReader([]byte{0x64, 0x8f, 0x50, 0xdd, 0x60})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadRelativeOID(5)
 
@@ -255,7 +253,7 @@ func TestReadRelativeOID1(t *testing.T) {
 func TestReadRelativeOID2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x19, 0xba, 0xef, 0x9a, 0x15, 0xa4, 0xe5, 0xc0, 0xad, 0xa4, 0xe5, 0xc0, 0xad, 0xa4, 0xe5, 0xc0, 0xad, 0x6a})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	_, err := reader.ReadRelativeOID(18)
 
@@ -268,7 +266,7 @@ func TestReadRelativeOID2(t *testing.T) {
 func TestReadObjectIdentifier(t *testing.T) {
 	in := bytes.NewReader([]byte{0x29, 0x28})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadObjectIdentifier(2)
 
@@ -287,7 +285,7 @@ func TestReadObjectIdentifier(t *testing.T) {
 func TestReadObjectIdentifier2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x90, 0x20, 0xdd, 0x60})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadObjectIdentifier(4)
 
@@ -306,7 +304,7 @@ func TestReadObjectIdentifier2(t *testing.T) {
 func TestReadObjectIdentifier3(t *testing.T) {
 	in := bytes.NewReader([]byte{0x19, 0xba, 0xef, 0x9a, 0x15, 0x83, 0xa1, 0xfb, 0xf9, 0x6a})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadObjectIdentifier(10)
 
@@ -326,7 +324,7 @@ func TestReadObjectIdentifier3(t *testing.T) {
 func TestReadObjectIdentifier4(t *testing.T) {
 	in := bytes.NewReader([]byte{0x19, 0xba, 0xef, 0x9a, 0x15, 0xa4, 0xe5, 0xc0, 0xad, 0x6a})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	value, err := reader.ReadObjectIdentifier(10)
 
@@ -346,7 +344,7 @@ func TestReadObjectIdentifier4(t *testing.T) {
 func TestReadTag(t *testing.T) {
 	in := bytes.NewReader([]byte{0x1e})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadTag()
 
@@ -366,7 +364,7 @@ func TestReadTag(t *testing.T) {
 func TestReadTag2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x5f, 0x81, 0x48, 0x01, 0x19})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 	var err error
 	var value int
 
@@ -402,7 +400,7 @@ func TestReadTag2(t *testing.T) {
 func TestReadTag3(t *testing.T) {
 	in := bytes.NewReader([]byte{0x5f, 0x81, 0x48, 0x01, 0x19})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadTag()
 
@@ -418,7 +416,7 @@ func TestReadTag3(t *testing.T) {
 func TestReadTagLookAhead(t *testing.T) {
 	in := bytes.NewReader([]byte{0x5f, 0x64, 0x01, 0x19})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadTag()
 
@@ -434,7 +432,7 @@ func TestReadTagLookAhead(t *testing.T) {
 func TestReadTagLookAhead2(t *testing.T) {
 	in := bytes.NewReader([]byte{0x5f, 0x64, 0x01, 0x19})
 
-	reader := ber.NewReader(in)
+	reader := NewReader(in)
 
 	err := reader.ReadTag()
 

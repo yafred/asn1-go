@@ -1,15 +1,14 @@
-package ber_test
+package ber
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/yafred/asn1-go/ber"
 	"github.com/yafred/asn1-go/types"
 )
 
 func TestWriteBoolean(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	encoded := writer.WriteBoolean(true)
 
@@ -24,7 +23,7 @@ func TestWriteBoolean(t *testing.T) {
 }
 
 func TestWriteOctetString(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 	value := [...]byte{0x01, 0x02, 0x03}
 
 	encoded := writer.WriteOctetString(value[0:])
@@ -38,7 +37,7 @@ func TestWriteOctetString(t *testing.T) {
 }
 
 func TestBufferIncrement(t *testing.T) {
-	writer := ber.NewWriter(3)
+	writer := NewWriter(3)
 
 	value1 := [...]byte{0x01, 0x02}
 	var encoded = writer.WriteOctetString(value1[0:])
@@ -65,7 +64,7 @@ func TestBufferIncrement(t *testing.T) {
 }
 
 func TestWriteRestrictedCharacterString(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := "Hello"
 	var encoded = writer.WriteRestrictedCharacterString(value)
@@ -79,7 +78,7 @@ func TestWriteRestrictedCharacterString(t *testing.T) {
 }
 
 func TestWriteLengthShort(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteLength(100)
 	if encoded != 1 {
@@ -92,7 +91,7 @@ func TestWriteLengthShort(t *testing.T) {
 }
 
 func TestWriteLength1b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteLength(201)
 	if encoded != 2 {
@@ -105,7 +104,7 @@ func TestWriteLength1b(t *testing.T) {
 }
 
 func TestWriteLength2b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteLength(500)
 	if encoded != 3 {
@@ -118,7 +117,7 @@ func TestWriteLength2b(t *testing.T) {
 }
 
 func TestWriteLength3b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteLength(500000)
 	if encoded != 4 {
@@ -131,7 +130,7 @@ func TestWriteLength3b(t *testing.T) {
 }
 
 func TestWriteLength4b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteLength(80000000)
 	if encoded != 5 {
@@ -144,7 +143,7 @@ func TestWriteLength4b(t *testing.T) {
 }
 
 func TestWriteInteger1b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(127)
 	if encoded != 1 {
@@ -157,7 +156,7 @@ func TestWriteInteger1b(t *testing.T) {
 }
 
 func TestWriteInteger1b2(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(-128)
 	if encoded != 1 {
@@ -170,7 +169,7 @@ func TestWriteInteger1b2(t *testing.T) {
 }
 
 func TestWriteInteger2b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(500)
 	if encoded != 2 {
@@ -183,7 +182,7 @@ func TestWriteInteger2b(t *testing.T) {
 }
 
 func TestWriteInteger3b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(500000)
 	if encoded != 3 {
@@ -196,7 +195,7 @@ func TestWriteInteger3b(t *testing.T) {
 }
 
 func TestWriteInteger4b(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(80000000)
 	if encoded != 4 {
@@ -209,7 +208,7 @@ func TestWriteInteger4b(t *testing.T) {
 }
 
 func TestWriteInteger4b2(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var encoded = writer.WriteInteger(-25000000)
 	if encoded != 4 {
@@ -222,7 +221,7 @@ func TestWriteInteger4b2(t *testing.T) {
 }
 
 func TestWriteBitString(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	bStringBytes := [...]byte{0x00, 0x20, 0x08}
 	bString := types.BitString{
@@ -240,7 +239,7 @@ func TestWriteBitString(t *testing.T) {
 }
 
 func TestWriteBitString2(t *testing.T) {
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	var bString types.BitString
 	bString.Set(20, true)
@@ -257,7 +256,7 @@ func TestWriteBitString2(t *testing.T) {
 }
 func TestWriteRelativeOID(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.RelativeOID([]int64{100, 2000, 12000})
 
@@ -275,7 +274,7 @@ func TestWriteRelativeOID(t *testing.T) {
 
 func TestWriteObjectIdentifier1(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{})
 
@@ -293,7 +292,7 @@ func TestWriteObjectIdentifier1(t *testing.T) {
 
 func TestWriteObjectIdentifier2(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{1})
 
@@ -311,7 +310,7 @@ func TestWriteObjectIdentifier2(t *testing.T) {
 
 func TestWriteObjectIdentifier3(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{3, 40})
 
@@ -329,7 +328,7 @@ func TestWriteObjectIdentifier3(t *testing.T) {
 
 func TestWriteObjectIdentifier4(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{1, 40})
 
@@ -347,7 +346,7 @@ func TestWriteObjectIdentifier4(t *testing.T) {
 
 func TestWriteObjectIdentifier5(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{1, 1, 40})
 
@@ -365,7 +364,7 @@ func TestWriteObjectIdentifier5(t *testing.T) {
 
 func TestWriteObjectIdentifier6(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{1, 1, 200})
 
@@ -383,7 +382,7 @@ func TestWriteObjectIdentifier6(t *testing.T) {
 
 func TestWriteObjectIdentifier7(t *testing.T) {
 
-	writer := ber.NewWriter(10)
+	writer := NewWriter(10)
 
 	value := types.ObjectIdentifier([]int64{2, 2000, 12000})
 
