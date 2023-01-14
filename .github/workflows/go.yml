@@ -24,3 +24,9 @@ jobs:
     - name: Run Unit tests
       run: |
         go test -v -coverprofile=covprofile ./...
+
+    - name: Install goveralls
+      run: go install github.com/mattn/goveralls@latest
+
+    - name: Send coverage
+      run: goveralls -coverprofile=covprofile -service=github -repotoken ${{ secrets.COVERALL_REPO_SECRET }}
